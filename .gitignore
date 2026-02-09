@@ -14,5 +14,8 @@
 .cxx
 local.properties
 
-# Firebase
+# Firebase - NIEMALS committen!
 app/google-services.json
+
+# Documentation - optional (entferne diese Zeile wenn du MD-Dateien committen willst)
+*.md
