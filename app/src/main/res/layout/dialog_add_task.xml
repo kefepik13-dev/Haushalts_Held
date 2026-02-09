@@ -33,6 +33,25 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Task Description (optional) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="@string/task_description"
+        app:startIconDrawable="@android:drawable/ic_menu_edit">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etTaskDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:maxLines="4"
+            android:gravity="top" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <!-- Assigned User Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"

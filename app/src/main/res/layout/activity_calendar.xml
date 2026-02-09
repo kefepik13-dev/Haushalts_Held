@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,63 +17,150 @@
             android:background="?attr/colorPrimary"
             app:title="@string/calendar"
             app:titleTextColor="@android:color/white" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Date Selection -->
-    <LinearLayout
+    <!-- Month / Week toggle -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        app:tabMode="fixed"
+        app:tabGravity="fill">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/select_date"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSelectDate"
+        <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/select"
-            app:cornerRadius="8dp" />
+            android:text="@string/month_view" />
 
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/week_view" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- Month view container -->
+    <LinearLayout
+        android:id="@+id/monthViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <ImageButton
+                android:id="@+id/btnPrevMonth"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_media_previous"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Previous" />
+
+            <TextView
+                android:id="@+id/tvMonthYear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnNextMonth"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_media_next"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Next" />
+        </LinearLayout>
+
+        <!-- Weekday headers -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="7"
+            android:rowCount="1">
+
+            <TextView android:text="Mo" android:textSize="12sp" android:gravity="center" android:padding="4dp" />
+            <TextView android:text="Di" android:textSize="12sp" android:gravity="center" android:padding="4dp" />
+            <TextView android:text="Mi" android:textSize="12sp" android:gravity="center" android:padding="4dp" />
+            <TextView android:text="Do" android:textSize="12sp" android:gravity="center" android:padding="4dp" />
+            <TextView android:text="Fr" android:textSize="12sp" android:gravity="center" android:padding="4dp" />
+            <TextView android:text="Sa" android:textSize="12sp" android:gravity="center" android:padding="4dp" />
+            <TextView android:text="So" android:textSize="12sp" android:gravity="center" android:padding="4dp" />
+        </GridLayout>
+
+        <!-- 7×6 day grid: fixed height so days are always visible -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/monthGrid"
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
-    <!-- Selected Date Display -->
-    <TextView
-        android:id="@+id/tvSelectedDate"
+    <!-- Week view container -->
+    <LinearLayout
+        android:id="@+id/weekViewContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:padding="16dp"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <ImageButton
+                android:id="@+id/btnPrevWeek"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_media_previous"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Previous week" />
+
+            <TextView
+                android:id="@+id/tvWeekRange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnNextWeek"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_media_next"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Next week" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/weekDaysRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:minHeight="72dp" />
+    </LinearLayout>
+
+    <!-- Hint: tap a day to see tasks -->
+    <TextView
+        android:id="@+id/tvTapHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/tap_day_to_see_tasks"
+        android:textSize="14sp"
         android:gravity="center"
-        android:textColor="@color/primary"
-        android:background="@android:color/white" />
-
-    <!-- Tasks for Selected Date -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/tasks_for_date"
-        android:textSize="16sp"
-        android:textStyle="bold"
         android:padding="16dp"
-        android:paddingBottom="8dp" />
-
-    <!-- Task List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvTasks"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp" />
-
+        android:textColor="@android:color/darker_gray" />
 </LinearLayout>
-

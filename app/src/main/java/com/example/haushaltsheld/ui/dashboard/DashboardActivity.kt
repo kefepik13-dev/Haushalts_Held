@@ -71,10 +71,10 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        taskAdapter = TaskAdapter(emptyList()) { task ->
+        taskAdapter = TaskAdapter(emptyList(), { task ->
             // Handle task click - toggle completion status
             toggleTaskCompletion(task)
-        }
+        })
         binding.rvTasks.layoutManager = LinearLayoutManager(this)
         binding.rvTasks.adapter = taskAdapter
     }
@@ -195,6 +195,7 @@ class DashboardActivity : AppCompatActivity() {
                         id = doc.id,
                         groupId = data["groupId"] as? String ?: "",
                         title = data["title"] as? String ?: "",
+                        description = data["description"] as? String ?: "",
                         assignedUserId = data["assignedUserId"] as? String ?: "",
                         assignedUserName = data["assignedUserName"] as? String ?: "",
                         date = (data["date"] as? com.google.firebase.Timestamp)?.toDate() ?: Date(),
@@ -209,9 +210,9 @@ class DashboardActivity : AppCompatActivity() {
                     tasks
                 }
 
-                taskAdapter = TaskAdapter(filteredTasks) { task ->
+                taskAdapter = TaskAdapter(filteredTasks, { task ->
                     toggleTaskCompletion(task)
-                }
+                })
                 binding.rvTasks.adapter = taskAdapter
             }
             .addOnFailureListener { e ->
@@ -266,6 +267,7 @@ class DashboardActivity : AppCompatActivity() {
         // Add button
         dialogBinding.btnAdd.setOnClickListener {
             val title = dialogBinding.etTaskTitle.text.toString().trim()
+            val description = dialogBinding.etTaskDescription.text.toString().trim()
             val assignedUserEmail = dialogBinding.etAssignedUserEmail.text.toString().trim()
 
             if (title.isEmpty()) {
@@ -296,6 +298,7 @@ class DashboardActivity : AppCompatActivity() {
                     val taskData = hashMapOf(
                         "groupId" to currentGroupId,
                         "title" to title,
+                        "description" to description,
                         "assignedUserId" to assignedUserId,
                         "assignedUserName" to assignedUserName,
                         "date" to com.google.firebase.Timestamp(selectedDate),

@@ -13,4 +13,18 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- User colors for calendar/dashboard (tasks by person) -->
+    <color name="user_color_1">#FF6200EE</color>
+    <color name="user_color_2">#FF03DAC5</color>
+    <color name="user_color_3">#FFE65100</color>
+    <color name="user_color_4">#FF00897B</color>
+    <color name="user_color_5">#FF7B1FA2</color>
+    <color name="user_color_6">#FF388E3C</color>
+    <color name="user_color_7">#FFF57C00</color>
+    <color name="user_color_8">#FF1976D2</color>
+
+    <!-- Calendar: today highlight -->
+    <color name="calendar_today_background">#1A6200EE</color>
+    <color name="calendar_today_text">#FF6200EE</color>
 </resources>
