@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">HaushaltsHeld</string>
+    
+    <!-- Authentication -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="name">Name</string>
+    <string name="dont_have_account_register">Don\'t have an account? Register</string>
+    <string name="already_have_account_login">Already have an account? Login</string>
+    <string name="please_fill_all_fields">Please fill all fields</string>
+    <string name="invalid_email">Invalid email address</string>
+    <string name="password_too_short">Password must be at least 6 characters</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="login_failed">Login failed</string>
+    <string name="registration_failed">Registration failed</string>
+    <string name="registration_successful">Registration successful!</string>
+    <string name="failed_to_save_user_data">Failed to save user data</string>
+    
+    <!-- Groups -->
+    <string name="create_group">Create Group</string>
+    <string name="creating">Creating...</string>
+    <string name="join_group">Join Group</string>
+    <string name="group_name">Group Name</string>
+    <string name="invitation_code">Invitation Code</string>
+    <string name="please_enter_group_name">Please enter group name</string>
+    <string name="please_enter_invitation_code">Please enter invitation code</string>
+    <string name="user_not_logged_in">User not logged in</string>
+    <string name="group_created_successfully">Group created successfully</string>
+    <string name="failed_to_create_group">Failed to create group</string>
+    <string name="invalid_invitation_code">Invalid invitation code</string>
+    <string name="already_member_of_group">You are already a member of this group</string>
+    <string name="joined_group_successfully">Joined group successfully</string>
+    <string name="failed_to_join_group">Failed to join group</string>
+    <string name="please_create_or_join_group">Please create or join a group first</string>
+    <string name="current_group">Current Group</string>
+    <string name="copy_invitation_code">Copy Invitation Code</string>
+    <string name="invitation_code_copied">Invitation code copied to clipboard!</string>
+    <string name="share_this_code_with_group_members">Share this code with group members so they can join.</string>
+    <string name="close">Close</string>
+    
+    <!-- Tasks -->
+    <string name="dashboard">Dashboard</string>
+    <string name="my_tasks">My Tasks</string>
+    <string name="all_tasks">All Tasks</string>
+    <string name="add_task">Add Task</string>
+    <string name="task_title">Task Title</string>
+    <string name="assigned_user_email">Assigned User Email</string>
+    <string name="assigned_to">Assigned to: %1$s</string>
+    <string name="select_date">Select Date</string>
+    <string name="select">Select</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
+    <string name="please_enter_task_title">Please enter task title</string>
+    <string name="user_not_found">User not found</string>
+    <string name="task_added_successfully">Task added successfully</string>
+    
+    <!-- Calendar -->
+    <string name="calendar">Calendar</string>
+    <string name="tasks_for_date">Tasks for selected date:</string>
+    <string name="no_tasks_for_this_date">No tasks for this date</string>
+    
+    <!-- General -->
+    <string name="logout">Logout</string>
+</resources>
