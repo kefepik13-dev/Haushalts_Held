@@ -105,8 +105,14 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     fun setTasksByDate(tasks: List<Task>) {
         val byDate = mutableMapOf<String, MutableList<Task>>()
         val userIds = mutableSetOf<String>()
+        val cal = Calendar.getInstance()
         for (task in tasks) {
-            val key = dateKeyFormat.format(task.date)
+            cal.timeInMillis = task.date.time
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            val key = dateKeyFormat.format(cal.time)
             byDate.getOrPut(key) { mutableListOf() }.add(task)
             if (task.assignedUserId.isNotEmpty()) userIds.add(task.assignedUserId)
         }
@@ -157,6 +163,11 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getUserIdToColorMap(): Map<String, Int> = userIdToColorMap
+
+    /** Get tasks for a specific date key (e.g. "2026-02-09"). */
+    fun getTasksForDate(dateKey: String): List<Task> {
+        return tasksByDateKey[dateKey] ?: emptyList()
+    }
 }
 
 /** One cell in the month grid (empty or day 1–31). */

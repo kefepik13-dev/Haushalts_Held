@@ -16,11 +16,15 @@ import com.example.haushaltsheld.R
 import com.example.haushaltsheld.databinding.ActivityDashboardBinding
 import com.example.haushaltsheld.databinding.DialogAddTaskBinding
 import com.example.haushaltsheld.model.Task
+import com.example.haushaltsheld.model.User
+import com.example.haushaltsheld.repository.FirebaseUserRepository
+import com.example.haushaltsheld.repository.UserRepository
 import com.example.haushaltsheld.ui.auth.LoginActivity
 import com.example.haushaltsheld.ui.calendar.CalendarActivity
 import com.example.haushaltsheld.ui.group.CreateGroupActivity
 import com.example.haushaltsheld.ui.group.JoinGroupActivity
 import com.example.haushaltsheld.ui.task.TaskAdapter
+import com.example.haushaltsheld.ui.task.UserAutoCompleteAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -37,6 +41,7 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var taskAdapter: TaskAdapter
+    private lateinit var userRepository: UserRepository
     private var currentGroupId: String? = null
     private var currentUserId: String? = null
     private var showingMyTasks = true
@@ -49,6 +54,7 @@ class DashboardActivity : AppCompatActivity() {
         // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
+        userRepository = FirebaseUserRepository(firestore)
 
         // Check if user is logged in
         val currentUser = auth.currentUser
@@ -222,7 +228,8 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun showAddTaskDialog() {
-        if (currentGroupId == null) {
+        val groupId = currentGroupId
+        if (groupId == null) {
             Toast.makeText(
                 this,
                 getString(R.string.please_create_or_join_group),
@@ -237,10 +244,45 @@ class DashboardActivity : AppCompatActivity() {
             .create()
 
         var selectedDate = Date()
+        var selectedUser: User? = null
 
         // Update date display
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         dialogBinding.tvSelectedDate.text = dateFormat.format(selectedDate)
+
+        // Load users from group and populate AutoCompleteTextView
+        dialogBinding.tilAssignedUser.isEnabled = false
+        userRepository.loadUsersByGroup(groupId) { result ->
+            result.fold(
+                onSuccess = { users ->
+                    if (users.isEmpty()) {
+                        Toast.makeText(
+                            this@DashboardActivity,
+                            getString(R.string.no_users_in_group),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        dialogBinding.tilAssignedUser.isEnabled = false
+                    } else {
+                        val adapter = UserAutoCompleteAdapter(this@DashboardActivity, users)
+                        dialogBinding.autoCompleteUser.setAdapter(adapter)
+                        dialogBinding.tilAssignedUser.isEnabled = true
+
+                        // Handle user selection: map displayed name to stored email/ID
+                        dialogBinding.autoCompleteUser.setOnItemClickListener { _, _, position, _ ->
+                            selectedUser = adapter.getItem(position)
+                        }
+                    }
+                },
+                onFailure = { exception ->
+                    Toast.makeText(
+                        this@DashboardActivity,
+                        getString(R.string.error_loading_users),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    android.util.Log.e("DashboardActivity", "Error loading users", exception)
+                }
+            )
+        }
 
         // Date picker
         dialogBinding.btnSelectDate.setOnClickListener {
@@ -268,7 +310,6 @@ class DashboardActivity : AppCompatActivity() {
         dialogBinding.btnAdd.setOnClickListener {
             val title = dialogBinding.etTaskTitle.text.toString().trim()
             val description = dialogBinding.etTaskDescription.text.toString().trim()
-            val assignedUserEmail = dialogBinding.etAssignedUserEmail.text.toString().trim()
 
             if (title.isEmpty()) {
                 Toast.makeText(this, getString(R.string.please_enter_task_title), Toast.LENGTH_SHORT)
@@ -276,53 +317,47 @@ class DashboardActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Find user by email
-            firestore.collection("users")
-                .whereEqualTo("email", assignedUserEmail)
-                .get()
-                .addOnSuccessListener { userDocuments ->
-                    if (userDocuments.isEmpty) {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.user_not_found),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@addOnSuccessListener
-                    }
+            if (selectedUser == null) {
+                Toast.makeText(
+                    this,
+                    getString(R.string.please_select_user),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
 
-                    val userDoc = userDocuments.documents[0]
-                    val assignedUserId = userDoc.id
-                    val assignedUserName = userDoc.getString("name") ?: assignedUserEmail
+            // Use selected user's ID and name (stored internally, displayed name was shown in UI)
+            val assignedUserId = selectedUser!!.id
+            val assignedUserName = selectedUser!!.name.ifEmpty { selectedUser!!.email }
 
-                    // Create task
-                    val taskData = hashMapOf(
-                        "groupId" to currentGroupId,
-                        "title" to title,
-                        "description" to description,
-                        "assignedUserId" to assignedUserId,
-                        "assignedUserName" to assignedUserName,
-                        "date" to com.google.firebase.Timestamp(selectedDate),
-                        "status" to "open"
-                    )
+            // Create task
+            val taskData = hashMapOf(
+                "groupId" to groupId,
+                "title" to title,
+                "description" to description,
+                "assignedUserId" to assignedUserId,
+                "assignedUserName" to assignedUserName,
+                "date" to com.google.firebase.Timestamp(selectedDate),
+                "status" to "open"
+            )
 
-                    firestore.collection("tasks")
-                        .add(taskData)
-                        .addOnSuccessListener {
-                            Toast.makeText(
-                                this,
-                                getString(R.string.task_added_successfully),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            dialog.dismiss()
-                            loadTasks()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(
-                                this,
-                                "Error: ${e.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+            firestore.collection("tasks")
+                .add(taskData)
+                .addOnSuccessListener {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.task_added_successfully),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    dialog.dismiss()
+                    loadTasks()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(
+                        this,
+                        "Error: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
         }
 

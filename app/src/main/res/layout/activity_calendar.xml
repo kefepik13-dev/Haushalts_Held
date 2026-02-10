@@ -153,14 +153,37 @@
             android:minHeight="72dp" />
     </LinearLayout>
 
-    <!-- Hint: tap a day to see tasks -->
+    <!-- Selected date header -->
     <TextView
-        android:id="@+id/tvTapHint"
+        android:id="@+id/tvSelectedDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/tap_day_to_see_tasks"
-        android:textSize="14sp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="12dp"
         android:gravity="center"
-        android:padding="16dp"
-        android:textColor="@android:color/darker_gray" />
+        android:textColor="@color/primary"
+        android:background="@android:color/white"
+        android:visibility="gone" />
+
+    <!-- Tasks for selected date -->
+    <TextView
+        android:id="@+id/tvTasksHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/tasks_for_date"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:padding="12dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone" />
+
+    <!-- Task list below calendar -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTasks"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="12dp"
+        android:visibility="gone" />
 </LinearLayout>

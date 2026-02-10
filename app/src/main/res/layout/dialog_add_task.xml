@@ -52,19 +52,24 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Assigned User Input -->
+    <!-- Assigned User Input (AutoCompleteTextView with Material Design) -->
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilAssignedUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:hint="@string/assigned_user_email"
-        app:startIconDrawable="@android:drawable/ic_menu_myplaces">
+        android:hint="@string/assigned_user"
+        app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etAssignedUserEmail"
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteUser"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress" />
+            android:inputType="text"
+            android:completionThreshold="1"
+            android:dropDownHeight="300dp"
+            android:dropDownVerticalOffset="4dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

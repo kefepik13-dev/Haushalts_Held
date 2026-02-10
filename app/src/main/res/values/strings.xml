@@ -49,6 +49,11 @@
     <string name="task_title">Task Title</string>
     <string name="task_description">Description (optional)</string>
     <string name="assigned_user_email">Assigned User Email</string>
+    <string name="assigned_user">Assign to user</string>
+    <string name="loading_users">Loading users...</string>
+    <string name="error_loading_users">Error loading users</string>
+    <string name="no_users_in_group">No users found in group</string>
+    <string name="please_select_user">Please select a user</string>
     <string name="assigned_to">Assigned to: %1$s</string>
     <string name="assigned_person_label">Assigned to</string>
     <string name="select_date">Select Date</string>
@@ -65,6 +70,7 @@
     <string name="week_view">Week</string>
     <string name="tasks_for_date">Tasks for selected date:</string>
     <string name="no_tasks_for_this_date">No tasks for this date</string>
+    <string name="error_loading_tasks">Error loading tasks</string>
     <string name="tap_day_to_see_tasks">Tap a day to view tasks</string>
     <string name="task_details">Task details</string>
     <string name="status">Status</string>

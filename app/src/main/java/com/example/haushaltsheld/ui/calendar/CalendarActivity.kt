@@ -37,8 +37,10 @@ class CalendarActivity : AppCompatActivity() {
     private lateinit var viewModel: CalendarViewModel
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var taskAdapter: TaskAdapter
     private var currentGroupId: String? = null
     private var isMonthView = true
+    private var selectedDate: Date? = null
 
     private val dateKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private val displayDateFormat = SimpleDateFormat("EEEE, dd. MMMM yyyy", Locale.getDefault())
@@ -63,6 +65,7 @@ class CalendarActivity : AppCompatActivity() {
         setupWeekNavigation()
         setupMonthGrid()
         setupWeekRecycler()
+        setupTaskRecyclerView()
         observeViewModel()
         // Build and show the day grid immediately (1–31)
         viewModel.setDisplayedMonth(
@@ -144,7 +147,17 @@ class CalendarActivity : AppCompatActivity() {
         binding.weekDaysRecycler.adapter = WeekDaysAdapter(emptyList()) { date -> onDayClicked(date) }
     }
 
+    private fun setupTaskRecyclerView() {
+        taskAdapter = TaskAdapter(emptyList(), { task -> showTaskDetailDialog(task) }, viewModel.getUserIdToColorMap())
+        binding.rvTasks.layoutManager = LinearLayoutManager(this)
+        binding.rvTasks.adapter = taskAdapter
+    }
+
     private fun onDayClicked(date: Date) {
+        selectedDate = date
+        showTasksForSelectedDay()
+        
+        // Also show BottomSheet (keep existing behavior)
         val groupId = currentGroupId
         if (groupId == null) {
             Toast.makeText(this, getString(R.string.please_create_or_join_group), Toast.LENGTH_SHORT).show()
@@ -162,18 +175,48 @@ class CalendarActivity : AppCompatActivity() {
 
         firestore.collection("tasks")
             .whereEqualTo("groupId", groupId)
-            .whereGreaterThanOrEqualTo("date", com.google.firebase.Timestamp(startOfDay))
-            .whereLessThan("date", com.google.firebase.Timestamp(endOfDay))
             .get()
             .addOnSuccessListener { documents ->
-                val tasks = documents.map { doc -> toTask(doc) }.sortedBy { it.date }
-                val userIds = tasks.map { it.assignedUserId }.filter { it.isNotEmpty() }.toSet()
+                val allTasks = documents.map { doc -> toTask(doc) }
+                val tasksForDay = allTasks.filter { task ->
+                    val taskCal = Calendar.getInstance().apply { time = task.date }
+                    taskCal.set(Calendar.HOUR_OF_DAY, 0)
+                    taskCal.set(Calendar.MINUTE, 0)
+                    taskCal.set(Calendar.SECOND, 0)
+                    taskCal.set(Calendar.MILLISECOND, 0)
+                    val taskDate = taskCal.time
+                    taskDate >= startOfDay && taskDate < endOfDay
+                }.sortedBy { it.date }
+                val userIds = tasksForDay.map { it.assignedUserId }.filter { it.isNotEmpty() }.toSet()
                 val colorMap = UserColorHelper.buildUserIdToColorMap(this, userIds)
-                showDayTasksBottomSheet(date, tasks, colorMap)
+                showDayTasksBottomSheet(date, tasksForDay, colorMap)
             }
             .addOnFailureListener {
                 Toast.makeText(this, getString(R.string.no_tasks_for_this_date), Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun showTasksForSelectedDay() {
+        val date = selectedDate ?: return
+        val key = dateKeyFormat.format(date)
+        
+        // Get tasks from ViewModel's tasksByDateKey
+        val tasks = viewModel.getTasksForDate(key)
+        
+        if (tasks.isNotEmpty()) {
+            binding.tvSelectedDate.visibility = View.VISIBLE
+            binding.tvTasksHeader.visibility = View.VISIBLE
+            binding.rvTasks.visibility = View.VISIBLE
+            
+            binding.tvSelectedDate.text = displayDateFormat.format(date)
+            taskAdapter = TaskAdapter(tasks, { task -> showTaskDetailDialog(task) }, viewModel.getUserIdToColorMap())
+            binding.rvTasks.adapter = taskAdapter
+        } else {
+            binding.tvSelectedDate.visibility = View.VISIBLE
+            binding.tvSelectedDate.text = displayDateFormat.format(date)
+            binding.tvTasksHeader.visibility = View.GONE
+            binding.rvTasks.visibility = View.GONE
+        }
     }
 
     private fun showDayTasksBottomSheet(date: Date, tasks: List<Task>, colorMap: Map<String, Int>) {
@@ -225,34 +268,68 @@ class CalendarActivity : AppCompatActivity() {
         start.set(Calendar.MILLISECOND, 0)
         val end = start.clone() as Calendar
         end.add(Calendar.MONTH, 1)
+        val startTime = start.timeInMillis
+        val endTime = end.timeInMillis
 
+        // Load all tasks for group, then filter by date in app (avoids Firestore composite index)
         firestore.collection("tasks")
             .whereEqualTo("groupId", groupId)
-            .whereGreaterThanOrEqualTo("date", com.google.firebase.Timestamp(start.time))
-            .whereLessThan("date", com.google.firebase.Timestamp(end.time))
             .get()
             .addOnSuccessListener { documents ->
-                val tasks = documents.map { doc -> toTask(doc) }
-                viewModel.setTasksByDate(tasks)
+                val allTasks = documents.map { doc -> toTask(doc) }
+                val tasksInMonth = allTasks.filter { task ->
+                    val t = task.date.time
+                    t >= startTime && t < endTime
+                }
+                viewModel.setTasksByDate(tasksInMonth)
+                // Auto-select today if no date is selected yet
+                if (selectedDate == null) {
+                    selectedDate = Date()
+                    showTasksForSelectedDay()
+                } else {
+                    showTasksForSelectedDay()
+                }
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("CalendarActivity", "loadTasksForMonth failed", e)
+                Toast.makeText(this, getString(R.string.error_loading_tasks), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun loadTasksForWeek() {
         val groupId = currentGroupId ?: return
-        val start = viewModel.displayedWeekStart.time
-        val endCal = viewModel.displayedWeekStart.clone() as Calendar
+        val startCal = viewModel.displayedWeekStart.clone() as Calendar
+        startCal.set(Calendar.HOUR_OF_DAY, 0)
+        startCal.set(Calendar.MINUTE, 0)
+        startCal.set(Calendar.SECOND, 0)
+        startCal.set(Calendar.MILLISECOND, 0)
+        val endCal = startCal.clone() as Calendar
         endCal.add(Calendar.DAY_OF_MONTH, 7)
-        val end = endCal.time
+        val startTime = startCal.timeInMillis
+        val endTime = endCal.timeInMillis
 
         firestore.collection("tasks")
             .whereEqualTo("groupId", groupId)
-            .whereGreaterThanOrEqualTo("date", com.google.firebase.Timestamp(start))
-            .whereLessThan("date", com.google.firebase.Timestamp(end))
             .get()
             .addOnSuccessListener { documents ->
-                val tasks = documents.map { doc -> toTask(doc) }
-                viewModel.setTasksByDate(tasks)
+                val allTasks = documents.map { doc -> toTask(doc) }
+                val tasksInWeek = allTasks.filter { task ->
+                    val t = task.date.time
+                    t >= startTime && t < endTime
+                }
+                viewModel.setTasksByDate(tasksInWeek)
                 viewModel.refreshWeekItems()
+                // Auto-select today if no date is selected yet
+                if (selectedDate == null) {
+                    selectedDate = Date()
+                    showTasksForSelectedDay()
+                } else {
+                    showTasksForSelectedDay()
+                }
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("CalendarActivity", "loadTasksForWeek failed", e)
+                Toast.makeText(this, getString(R.string.error_loading_tasks), Toast.LENGTH_SHORT).show()
             }
     }
 

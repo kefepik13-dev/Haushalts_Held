@@ -44,12 +44,22 @@ class TaskAdapter(
     ) : RecyclerView.ViewHolder(itemView) {
         private val cardView: MaterialCardView = itemView.findViewById(R.id.taskCard)
         private val tvTaskTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
+        private val tvTaskDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
         private val tvAssignedUser: TextView = itemView.findViewById(R.id.tvAssignedUser)
         private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
         private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
 
         fun bind(task: Task) {
             tvTaskTitle.text = task.title
+            
+            // Show description if available
+            if (task.description.isNotEmpty()) {
+                tvTaskDescription.text = task.description
+                tvTaskDescription.visibility = View.VISIBLE
+            } else {
+                tvTaskDescription.visibility = View.GONE
+            }
+            
             tvAssignedUser.text = itemView.context.getString(
                 R.string.assigned_to,
                 task.assignedUserName
