@@ -97,12 +97,12 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         // Add Task FAB
-        binding.fabAddTask.setOnClickListener {
+        binding.btnAddTask.setOnClickListener {
             showAddTaskDialog()
         }
 
-        // Calendar FAB
-        binding.fabCalendar.setOnClickListener {
+        // Calendar button
+        binding.btnCalendar.setOnClickListener {
             startActivity(Intent(this, CalendarActivity::class.java))
         }
 

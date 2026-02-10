@@ -144,25 +144,47 @@
         android:layout_weight="1"
         android:padding="16dp" />
 
-    <!-- Floating Action Button for Adding Tasks -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddTask"
-        android:layout_width="wrap_content"
+    <!-- Calendar and Add Task buttons (bigger, side by side, above Logout) -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
-        app:tint="@android:color/white" />
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:gravity="center">
 
-    <!-- Calendar Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabCalendar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_menu_today"
-        app:tint="@android:color/white" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCalendar"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="@string/calendar"
+            android:textSize="16sp"
+            android:layout_marginEnd="8dp"
+            app:cornerRadius="8dp"
+            app:icon="@android:drawable/ic_menu_today"
+            app:iconTint="@android:color/white"
+            app:iconGravity="textStart"
+            app:iconSize="24dp"
+            app:iconPadding="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddTask"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="@string/add_task"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp"
+            app:cornerRadius="8dp"
+            app:icon="@android:drawable/ic_input_add"
+            app:iconTint="@android:color/white"
+            app:iconGravity="textStart"
+            app:iconSize="24dp"
+            app:iconPadding="8dp" />
+    </LinearLayout>
 
     <!-- Logout Button -->
     <com.google.android.material.button.MaterialButton
